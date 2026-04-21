@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-import { CredentialManager, loadCredentials } from "../auth/credentialStore.js";
+import { CredentialManager } from "../auth/credentialStore.js";
 import { TokenProvider } from "../auth/tokenProvider.js";
 import type { RuntimeConfig } from "../config.js";
 
@@ -61,16 +61,6 @@ export function registerAuthCommands(
       process.stdout.write("Stored credentials removed from local backends.\n");
     });
 
-  auth
-    .command("token")
-    .description("Validate current credentials by fetching an access token")
-    .action(async () => {
-      const config = getConfig();
-      const credentials = await loadCredentials(manager);
-      const provider = new TokenProvider(config.baseUrl, config.timeoutMs);
-      const token = await provider.getAccessToken(credentials);
-      process.stdout.write(`Token retrieved successfully (length=${token.length}).\n`);
-    });
 }
 
 async function prompt(label: string): Promise<string> {

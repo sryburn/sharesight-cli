@@ -7,13 +7,11 @@ export const APP_NAME = "sharesight-cli";
 export interface RuntimeConfig {
   baseUrl: string;
   timeoutMs: number;
-  verbose: boolean;
 }
 
 export function readRuntimeConfig(options: {
   baseUrl?: string;
   timeoutMs?: string;
-  verbose?: boolean;
 }): RuntimeConfig {
   const timeoutMs = options.timeoutMs ? Number(options.timeoutMs) : 30000;
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
@@ -23,7 +21,6 @@ export function readRuntimeConfig(options: {
   return {
     baseUrl: options.baseUrl ?? DEFAULT_BASE_URL,
     timeoutMs,
-    verbose: Boolean(options.verbose),
   };
 }
 

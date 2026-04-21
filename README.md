@@ -2,18 +2,16 @@
 
 CLI wrapper for a focused subset of the Sharesight API, designed with AI agent workflows in mind.
 
-## MVP commands
+## Commands
 
 - `sharesight auth login`
 - `sharesight auth status`
 - `sharesight auth logout`
-- `sharesight group list`
-- `sharesight group use <grouping-or-custom-name-or-id>`
-- `sharesight group show`
-- `sharesight portfolio list`
-- `sharesight portfolio show`
-- `sharesight portfolio use <id-or-name>`
-- `sharesight performance [--portfolio <id-or-name>]`
+- `sharesight defaults show`
+- `sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>]`
+- `sharesight list portfolios`
+- `sharesight list groupings`
+- `sharesight get performance [--portfolio <id-or-name>]`
 
 ## Installation
 
@@ -43,37 +41,47 @@ You can provide credentials in two ways:
 
 Use `sharesight auth status` to see which credential backend is currently active.
 
-## Portfolio ergonomics
+## Defaults
 
-- Discover portfolios: `sharesight portfolio list`
-- Show current default: `sharesight portfolio show`
-- Set a default once: `sharesight portfolio use "My Portfolio"`
-- After default is set, `sharesight performance` can be called without `--portfolio`.
-- `--portfolio` accepts exact name or ID.
-- For compatibility, `portfolio use` accepts either positional value or `--portfolio`.
+Set defaults once, then run report commands without repeating flags.
 
-## Performance command
+- Show current defaults:
+  - `sharesight defaults show`
+- Set default portfolio and grouping together:
+  - `sharesight defaults set --portfolio "Main Portfolio" --grouping market`
+- Set only one default:
+  - `sharesight defaults set --portfolio 123`
+  - `sharesight defaults set --grouping "Long Term"`
+
+## Lists
+
+- Portfolios:
+  - `sharesight list portfolios`
+- Groupings (built-in + custom):
+  - `sharesight list groupings`
+
+## Get performance
 
 ```bash
-sharesight performance --portfolio 123 --format json
-sharesight performance --portfolio "Main Portfolio" --start-date 2024-01-01 --end-date 2024-12-31 --include-sales
-sharesight performance --grouping market
-sharesight performance --grouping 123
-sharesight performance --grouping "Long Term"
-sharesight performance --view raw
+sharesight get performance --format json
+sharesight get performance --portfolio 123 --format json
+sharesight get performance --start-date 2024-01-01 --end-date 2024-12-31 --include-sales
+sharesight get performance --grouping market
+sharesight get performance --grouping 123
+sharesight get performance --grouping "Long Term"
 ```
 
-If `--grouping` is omitted, the CLI uses the default set by `sharesight group use`.
-
-Use `sharesight group list` to view valid default groups and discover custom group names/IDs.
-
-`performance` defaults to `--view table` (AI-friendly grouped rows + totals). Use `--view raw` for the full API payload.
+- If `--portfolio` is omitted, `get performance` uses the default portfolio from `defaults set`.
+- If `--grouping` is omitted, `get performance` uses the default grouping from `defaults set`.
+- `--grouping` accepts:
+  - standard grouping names (`market`, `currency`, etc.)
+  - custom grouping ID (e.g. `123`)
+  - custom grouping exact name (e.g. `"Long Term"`)
 
 Global options:
 
 - `--base-url` (default `https://api.sharesight.com`)
 - `--timeout-ms` (default `30000`)
-- `--verbose`
 
 ## Output formats
 

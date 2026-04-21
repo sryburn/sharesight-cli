@@ -1,16 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePerformanceView, renderPerformanceView } from "../src/performanceView.js";
-
-describe("normalizePerformanceView", () => {
-  it("accepts table and raw", () => {
-    expect(normalizePerformanceView("table")).toBe("table");
-    expect(normalizePerformanceView("raw")).toBe("raw");
-  });
-
-  it("throws for unsupported values", () => {
-    expect(() => normalizePerformanceView("summary")).toThrow("Unsupported view");
-  });
-});
+import { renderPerformanceTableView } from "../src/performanceView.js";
 
 describe("renderPerformanceView", () => {
   const sampleReport = {
@@ -80,30 +69,11 @@ describe("renderPerformanceView", () => {
     },
   };
 
-  it("renders raw view passthrough", () => {
-    const result = renderPerformanceView({
-      view: "raw",
-      portfolioId: 1,
-      portfolioName: "Main",
-      consolidated: false,
-      grouping: "market",
-      customGroupId: undefined,
-      report: samplePayload,
-    }) as Record<string, unknown>;
-
-    expect(result.portfolioId).toBe(1);
-    expect(result.portfolioName).toBe("Main");
-    expect(result.report).toEqual(samplePayload);
-  });
-
   it("renders table view with grouped holdings", () => {
-    const result = renderPerformanceView({
-      view: "table",
+    const result = renderPerformanceTableView({
       portfolioId: 1,
       portfolioName: "Main",
       consolidated: false,
-      grouping: "market",
-      customGroupId: undefined,
       report: samplePayload,
     }) as Record<string, unknown>;
 
@@ -128,8 +98,7 @@ describe("renderPerformanceView", () => {
   });
 
   it("renders table view when payload is only one report level", () => {
-    const result = renderPerformanceView({
-      view: "table",
+    const result = renderPerformanceTableView({
       portfolioId: 1,
       portfolioName: "Main",
       consolidated: false,
@@ -140,8 +109,7 @@ describe("renderPerformanceView", () => {
   });
 
   it("renders table view when payload is direct report shape", () => {
-    const result = renderPerformanceView({
-      view: "table",
+    const result = renderPerformanceTableView({
       portfolioId: 1,
       portfolioName: "Main",
       consolidated: false,

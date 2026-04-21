@@ -1,32 +1,9 @@
-export type PerformanceView = "table" | "raw";
-
-export function normalizePerformanceView(input: string): PerformanceView {
-  if (input === "table" || input === "raw") {
-    return input;
-  }
-  throw new Error(`Unsupported view '${input}'. Use table or raw.`);
-}
-
-export function renderPerformanceView(params: {
-  view: PerformanceView;
+export function renderPerformanceTableView(params: {
   portfolioId: number;
   portfolioName: string;
   consolidated: boolean;
-  grouping?: string;
-  customGroupId?: number;
   report: unknown;
 }): unknown {
-  if (params.view === "raw") {
-    return {
-      portfolioId: params.portfolioId,
-      portfolioName: params.portfolioName,
-      consolidated: params.consolidated,
-      grouping: params.grouping,
-      customGroupId: params.customGroupId,
-      report: params.report,
-    };
-  }
-
   return buildTableView(params);
 }
 

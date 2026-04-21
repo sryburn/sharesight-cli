@@ -4,26 +4,23 @@ import type { RuntimeConfig } from "../config.js";
 import { printOutput } from "../formatters/output.js";
 import { extractCustomGroupsFromV2GroupsResponse, resolveGroupingSelection } from "../grouping.js";
 import { SharesightClient } from "../http/sharesightClient.js";
-import { normalizePerformanceView, renderPerformanceView } from "../performanceView.js";
+import { renderPerformanceTableView } from "../performanceView.js";
 import { resolvePortfolioByIdOrName } from "../portfolioResolver.js";
 import { ContextStore } from "../state/contextStore.js";
 import type { OutputFormat, Portfolio } from "../types.js";
 
-export function registerPerformanceCommand(
-  program: Command,
-  getConfig: () => RuntimeConfig,
-): void {
+export function registerGetCommands(program: Command, getConfig: () => RuntimeConfig): void {
+  const get = program.command("get").description("Get Sharesight reports and data");
   const contextStore = new ContextStore();
-  program
+
+  get
     .command("performance")
-    .description("Show Sharesight portfolio performance report")
+    .description("Get Sharesight portfolio performance report")
     .option("--portfolio <id-or-name>", "Portfolio ID or exact name")
     .option("--start-date <date>", "Start date (YYYY-MM-DD)")
     .option("--end-date <date>", "End date (YYYY-MM-DD)")
     .option("--include-sales", "Include sold positions")
     .option("--grouping <grouping>", "Performance grouping or custom group name/id")
-    .option("--period <period>", "Sharesight period value")
-    .option("--view <view>", "table|raw", "table")
     .option("--format <format>", "json|jsonl", "json")
     .action(async (options) => {
       const config = getConfig();
@@ -53,15 +50,11 @@ export function registerPerformanceCommand(
         grouping: grouping.grouping,
         custom_group_id: grouping.customGroupId ? String(grouping.customGroupId) : undefined,
         consolidated: selected.consolidated ? "true" : undefined,
-        period: options.period,
       });
-      const output = renderPerformanceView({
-        view: normalizePerformanceView(options.view as string),
+      const output = renderPerformanceTableView({
         portfolioId: selected.id,
         portfolioName: selected.name,
         consolidated: selected.consolidated,
-        grouping: grouping.grouping,
-        customGroupId: grouping.customGroupId,
         report: performance,
       });
       printOutput(output, normalizeFormat(options.format));
@@ -96,6 +89,6 @@ async function resolveSelectedPortfolio(params: {
   }
 
   throw new Error(
-    "No portfolio selected. Use --portfolio <id-or-name> or run `sharesight portfolio use --portfolio <id-or-name>`.",
+    "No default portfolio set. Run `sharesight defaults set --portfolio <id-or-name>` or pass --portfolio.",
   );
 }

@@ -3,9 +3,9 @@ import { setDefaultResultOrder } from "node:dns";
 import { Command } from "commander";
 import { readRuntimeConfig } from "./config.js";
 import { registerAuthCommands } from "./commands/auth.js";
-import { registerGroupCommands } from "./commands/group.js";
-import { registerPortfolioCommands } from "./commands/portfolio.js";
-import { registerPerformanceCommand } from "./commands/performance.js";
+import { registerDefaultsCommands } from "./commands/defaults.js";
+import { registerGetCommands } from "./commands/get.js";
+import { registerListCommands } from "./commands/list.js";
 
 async function main(): Promise<void> {
   try {
@@ -20,19 +20,43 @@ async function main(): Promise<void> {
     .version("0.1.0")
     .option("--base-url <url>", "Sharesight API base URL")
     .option("--timeout-ms <ms>", "Request timeout in milliseconds")
-    .option("--verbose", "Enable verbose output", false);
+    .addHelpText(
+      "after",
+      `
+Command reference:
+  auth
+    sharesight auth login [--client-id <id>] [--client-secret <secret>]
+    sharesight auth status
+    sharesight auth logout
+
+  defaults
+    sharesight defaults show [--format json|jsonl]
+    sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>]
+
+  list
+    sharesight list portfolios [--format json|jsonl]
+    sharesight list groupings [--format json|jsonl]
+
+  get
+    sharesight get performance [--portfolio <id-or-name>] [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD]
+      [--include-sales] [--grouping <grouping-or-custom-name-or-id>]
+      [--format json|jsonl]
+
+Details:
+  sharesight <command> --help
+`,
+    );
 
   const getConfig = () =>
     readRuntimeConfig({
       baseUrl: program.opts().baseUrl as string | undefined,
       timeoutMs: program.opts().timeoutMs as string | undefined,
-      verbose: program.opts().verbose as boolean | undefined,
     });
 
   registerAuthCommands(program, getConfig);
-  registerGroupCommands(program, getConfig);
-  registerPortfolioCommands(program, getConfig);
-  registerPerformanceCommand(program, getConfig);
+  registerDefaultsCommands(program, getConfig);
+  registerListCommands(program, getConfig);
+  registerGetCommands(program, getConfig);
 
   try {
     await program.parseAsync(process.argv);

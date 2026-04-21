@@ -121,7 +121,7 @@ function resolveDefaultGrouping(
   }
   if (!defaultCustomGroupId) {
     throw new Error(
-      "Saved default grouping is custom_group but custom group id is missing. Run `sharesight group use <name-or-id>`.",
+      "Saved default grouping is custom_group but custom group id is missing. Run `sharesight defaults set --grouping <name-or-id>`.",
     );
   }
   return { grouping: "custom_group", customGroupId: defaultCustomGroupId };
