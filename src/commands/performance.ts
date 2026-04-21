@@ -4,6 +4,7 @@ import type { RuntimeConfig } from "../config.js";
 import { printOutput } from "../formatters/output.js";
 import { extractCustomGroupsFromV2GroupsResponse, resolveGroupingSelection } from "../grouping.js";
 import { SharesightClient } from "../http/sharesightClient.js";
+import { normalizePerformanceView, renderPerformanceView } from "../performanceView.js";
 import { resolvePortfolioByIdOrName } from "../portfolioResolver.js";
 import { ContextStore } from "../state/contextStore.js";
 import type { OutputFormat, Portfolio } from "../types.js";
@@ -22,6 +23,7 @@ export function registerPerformanceCommand(
     .option("--include-sales", "Include sold positions")
     .option("--grouping <grouping>", "Performance grouping or custom group name/id")
     .option("--period <period>", "Sharesight period value")
+    .option("--view <view>", "table|raw", "table")
     .option("--format <format>", "json|jsonl", "json")
     .action(async (options) => {
       const config = getConfig();
@@ -53,17 +55,16 @@ export function registerPerformanceCommand(
         consolidated: selected.consolidated ? "true" : undefined,
         period: options.period,
       });
-      printOutput(
-        {
-          portfolioId: selected.id,
-          portfolioName: selected.name,
-          consolidated: selected.consolidated,
-          grouping: grouping.grouping,
-          customGroupId: grouping.customGroupId,
-          report: performance,
-        },
-        normalizeFormat(options.format),
-      );
+      const output = renderPerformanceView({
+        view: normalizePerformanceView(options.view as string),
+        portfolioId: selected.id,
+        portfolioName: selected.name,
+        consolidated: selected.consolidated,
+        grouping: grouping.grouping,
+        customGroupId: grouping.customGroupId,
+        report: performance,
+      });
+      printOutput(output, normalizeFormat(options.format));
     });
 }
 

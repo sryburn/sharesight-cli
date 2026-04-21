@@ -60,11 +60,14 @@ sharesight performance --portfolio "Main Portfolio" --start-date 2024-01-01 --en
 sharesight performance --grouping market
 sharesight performance --grouping 123
 sharesight performance --grouping "Long Term"
+sharesight performance --view raw
 ```
 
 If `--grouping` is omitted, the CLI uses the default set by `sharesight group use`.
 
 Use `sharesight group list` to view valid default groups and discover custom group names/IDs.
+
+`performance` defaults to `--view table` (AI-friendly grouped rows + totals). Use `--view raw` for the full API payload.
 
 Global options:
 
