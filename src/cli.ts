@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 import { setDefaultResultOrder } from "node:dns";
+import { createRequire } from "node:module";
 import { Command } from "commander";
 import { readRuntimeConfig } from "./config.js";
 import { registerAuthCommands } from "./commands/auth.js";
 import { registerDefaultsCommands } from "./commands/defaults.js";
 import { registerGetCommands } from "./commands/get.js";
 import { registerListCommands } from "./commands/list.js";
+
+const require = createRequire(import.meta.url);
+const packageJson = require("../package.json") as { version?: string };
+const cliVersion = typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
 
 async function main(): Promise<void> {
   try {
@@ -17,7 +22,7 @@ async function main(): Promise<void> {
   const program = new Command()
     .name("sharesight")
     .description("Unofficial CLI client for Sharesight")
-    .version("0.1.0")
+    .version(cliVersion)
     .option("--base-url <url>", "Sharesight API base URL")
     .option("--timeout-ms <ms>", "Request timeout in milliseconds")
     .addHelpText(

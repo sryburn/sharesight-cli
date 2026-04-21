@@ -31,7 +31,7 @@ describe("TokenProvider error mapping", () => {
     const aggregate = Object.assign(new AggregateError([], "connect timeout"), {
       code: "ETIMEDOUT",
       errors: [
-        Object.assign(new Error("connect ETIMEDOUT 104.26.4.245:443"), {
+        Object.assign(new Error("connect ETIMEDOUT api.sharesight.com:443"), {
           code: "ETIMEDOUT",
         }),
       ],

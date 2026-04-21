@@ -1,13 +1,14 @@
 import type { Command } from "commander";
 import { loadCredentials } from "../auth/credentialStore.js";
 import type { RuntimeConfig } from "../config.js";
+import { parseOutputFormat } from "../formatters/formatOption.js";
 import { printOutput } from "../formatters/output.js";
 import { extractCustomGroupsFromV2GroupsResponse, resolveGroupingSelection } from "../grouping.js";
 import { SharesightClient } from "../http/sharesightClient.js";
 import { renderPerformanceTableView } from "../performanceView.js";
 import { resolvePortfolioByIdOrName } from "../portfolioResolver.js";
 import { ContextStore } from "../state/contextStore.js";
-import type { OutputFormat, Portfolio } from "../types.js";
+import type { Portfolio } from "../types.js";
 
 export function registerGetCommands(program: Command, getConfig: () => RuntimeConfig): void {
   const get = program.command("get").description("Get Sharesight reports and data");
@@ -71,22 +72,8 @@ export function registerGetCommands(program: Command, getConfig: () => RuntimeCo
         consolidated: selected.consolidated,
         report: performance,
       });
-      printOutput(output, resolveOutputFormat(options.format as string | undefined, context.defaultFormat));
+      printOutput(output, parseOutputFormat(options.format as string | undefined, context.defaultFormat));
     });
-}
-
-function normalizeFormat(input: string): OutputFormat {
-  if (input === "json" || input === "jsonl") {
-    return input;
-  }
-  throw new Error(`Unsupported format '${input}'. Use json or jsonl.`);
-}
-
-function resolveOutputFormat(explicit: string | undefined, fallback: OutputFormat | undefined): OutputFormat {
-  if (explicit) {
-    return normalizeFormat(explicit);
-  }
-  return fallback ?? "json";
 }
 
 function resolveIncludeSalesOption(params: {

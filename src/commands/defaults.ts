@@ -1,12 +1,12 @@
 import type { Command } from "commander";
 import { loadCredentials } from "../auth/credentialStore.js";
 import type { RuntimeConfig } from "../config.js";
+import { parseOutputFormat } from "../formatters/formatOption.js";
 import { printOutput } from "../formatters/output.js";
 import { extractCustomGroupsFromV2GroupsResponse, resolveGroupingSelection } from "../grouping.js";
 import { SharesightClient } from "../http/sharesightClient.js";
 import { resolvePortfolioByIdOrName } from "../portfolioResolver.js";
 import { ContextStore } from "../state/contextStore.js";
-import type { OutputFormat } from "../types.js";
 
 export function registerDefaultsCommands(
   program: Command,
@@ -40,7 +40,7 @@ export function registerDefaultsCommands(
           includeSales: state.defaultIncludeSales,
           format: state.defaultFormat,
         },
-        normalizeFormat(options.format),
+        parseOutputFormat(options.format),
       );
     });
 
@@ -109,7 +109,7 @@ export function registerDefaultsCommands(
 
       const includeSalesDefault =
         includeSales ? true : excludeSales ? false : current.defaultIncludeSales;
-      const defaultFormat = formatInput ? normalizeFormat(formatInput) : current.defaultFormat;
+      const defaultFormat = parseOutputFormat(formatInput, current.defaultFormat);
 
       await contextStore.write({
         ...current,
@@ -126,11 +126,4 @@ export function registerDefaultsCommands(
 function readAccessLevel(portfolio: { [key: string]: unknown }): string | undefined {
   const value = portfolio.access_level;
   return typeof value === "string" ? value : undefined;
-}
-
-function normalizeFormat(input: string): OutputFormat {
-  if (input === "json" || input === "jsonl") {
-    return input;
-  }
-  throw new Error(`Unsupported format '${input}'. Use json or jsonl.`);
 }
