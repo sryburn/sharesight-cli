@@ -28,6 +28,7 @@ export function registerDefaultsCommands(
                 id: state.defaultPortfolioId,
                 name: state.defaultPortfolioName ?? `Portfolio ${state.defaultPortfolioId}`,
                 consolidated: state.defaultPortfolioConsolidated ?? false,
+                accessLevel: state.defaultPortfolioAccessLevel,
               }
             : undefined,
           grouping: state.defaultGrouping
@@ -62,6 +63,7 @@ export function registerDefaultsCommands(
         defaultPortfolioId: current.defaultPortfolioId,
         defaultPortfolioName: current.defaultPortfolioName,
         defaultPortfolioConsolidated: current.defaultPortfolioConsolidated,
+        defaultPortfolioAccessLevel: current.defaultPortfolioAccessLevel,
       };
       if (portfolioInput) {
         const portfolios = await client.listAllPortfolios(credentials);
@@ -70,6 +72,7 @@ export function registerDefaultsCommands(
           defaultPortfolioId: selected.id,
           defaultPortfolioName: selected.name,
           defaultPortfolioConsolidated: selected.consolidated,
+          defaultPortfolioAccessLevel: readAccessLevel(selected),
         };
       }
 
@@ -99,6 +102,11 @@ export function registerDefaultsCommands(
 
       process.stdout.write("Defaults updated.\n");
     });
+}
+
+function readAccessLevel(portfolio: { [key: string]: unknown }): string | undefined {
+  const value = portfolio.access_level;
+  return typeof value === "string" ? value : undefined;
 }
 
 function normalizeFormat(input: string): OutputFormat {

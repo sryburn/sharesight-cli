@@ -14,6 +14,7 @@ describe("ContextStore", () => {
       defaultPortfolioId: 123,
       defaultPortfolioName: "Main",
       defaultPortfolioConsolidated: true,
+      defaultPortfolioAccessLevel: "OWNER",
       defaultGrouping: "custom_group",
       defaultCustomGroupId: 456,
     });
@@ -21,6 +22,7 @@ describe("ContextStore", () => {
     expect(state.defaultPortfolioId).toBe(123);
     expect(state.defaultPortfolioName).toBe("Main");
     expect(state.defaultPortfolioConsolidated).toBe(true);
+    expect(state.defaultPortfolioAccessLevel).toBe("OWNER");
     expect(state.defaultGrouping).toBe("custom_group");
     expect(state.defaultCustomGroupId).toBe(456);
   });

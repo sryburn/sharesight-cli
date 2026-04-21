@@ -42,6 +42,12 @@ export function registerGetCommands(program: Command, getConfig: () => RuntimeCo
           return extractCustomGroupsFromV2GroupsResponse(response);
         },
       });
+      await assertCustomGroupingAccess({
+        selectedPortfolio: selected,
+        grouping: grouping.grouping,
+        client,
+        credentials,
+      });
 
       const performance = await client.getPerformance(credentials, selected.id, {
         start_date: options.startDate,
@@ -85,10 +91,55 @@ async function resolveSelectedPortfolio(params: {
       id: state.defaultPortfolioId,
       name: state.defaultPortfolioName ?? `Portfolio ${state.defaultPortfolioId}`,
       consolidated: state.defaultPortfolioConsolidated,
+      access_level: state.defaultPortfolioAccessLevel,
     };
   }
 
   throw new Error(
     "No default portfolio set. Run `sharesight defaults set --portfolio <id-or-name>` or pass --portfolio.",
   );
+}
+
+async function assertCustomGroupingAccess(params: {
+  selectedPortfolio: Portfolio;
+  grouping?: string;
+  client: SharesightClient;
+  credentials: Awaited<ReturnType<typeof loadCredentials>>;
+}): Promise<void> {
+  if (params.grouping !== "custom_group") {
+    return;
+  }
+
+  const accessLevel = await resolveAccessLevel(params);
+  if (accessLevel === "OWNER") {
+    return;
+  }
+
+  throw new Error(
+    `Custom grouping requires portfolio access_level OWNER. Selected portfolio has access_level ${accessLevel ?? "UNKNOWN"}. Use a default grouping or choose an OWNER portfolio.`,
+  );
+}
+
+async function resolveAccessLevel(params: {
+  selectedPortfolio: Portfolio;
+  client: SharesightClient;
+  credentials: Awaited<ReturnType<typeof loadCredentials>>;
+}): Promise<string | undefined> {
+  const direct = readAccessLevel(params.selectedPortfolio);
+  if (direct) {
+    return direct;
+  }
+
+  const portfolios = await params.client.listAllPortfolios(params.credentials);
+  const matched = portfolios.find((portfolio) => portfolio.id === params.selectedPortfolio.id);
+  if (!matched) {
+    return undefined;
+  }
+
+  return readAccessLevel(matched);
+}
+
+function readAccessLevel(portfolio: Portfolio): string | undefined {
+  const value = portfolio.access_level;
+  return typeof value === "string" ? value : undefined;
 }

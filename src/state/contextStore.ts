@@ -9,6 +9,7 @@ const stateSchema = z.object({
   defaultPortfolioId: z.number().int().positive().optional(),
   defaultPortfolioName: z.string().min(1).optional(),
   defaultPortfolioConsolidated: z.boolean().optional(),
+  defaultPortfolioAccessLevel: z.string().min(1).optional(),
   defaultGrouping: z
     .enum([
       "country",

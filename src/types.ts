@@ -26,6 +26,7 @@ export interface CliContextState {
   defaultPortfolioId?: number;
   defaultPortfolioName?: string;
   defaultPortfolioConsolidated?: boolean;
+  defaultPortfolioAccessLevel?: string;
   defaultGrouping?: PerformanceGrouping;
   defaultCustomGroupId?: number;
 }
