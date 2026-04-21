@@ -43,6 +43,9 @@ function buildTableView(params: {
 
   const holdings = asArray(report.holdings);
   const subTotals = asArray(report.sub_totals);
+  const portfolioValue = asNumber(report.value) ?? 0;
+  const holdingContributionDenominator = sumAbsoluteTotalGains(holdings);
+  const groupContributionDenominator = sumAbsoluteTotalGains(subTotals);
 
   const holdingsByGroup = new Map<string, unknown[]>();
   for (const holding of holdings) {
@@ -52,7 +55,12 @@ function buildTableView(params: {
     }
     const key = `${asNumber(holdingRecord.group_id) ?? -1}|${asString(holdingRecord.group_name) ?? "Ungrouped"}`;
     const existing = holdingsByGroup.get(key) ?? [];
-    existing.push(formatHoldingRow(holdingRecord));
+    existing.push(
+      formatHoldingRow(holdingRecord, {
+        portfolioValue,
+        contributionDenominator: holdingContributionDenominator,
+      }),
+    );
     holdingsByGroup.set(key, existing);
   }
 
@@ -65,10 +73,16 @@ function buildTableView(params: {
       const groupId = asNumber(subtotalRecord.group_id);
       const groupName = asString(subtotalRecord.group_name);
       const key = `${groupId ?? -1}|${groupName ?? "Ungrouped"}`;
+      const groupTotals = formatTotalRow(subtotalRecord) as Record<string, unknown>;
       return {
         groupId,
         groupName,
-        totals: formatTotalRow(subtotalRecord),
+        portfolioWeightPercent: calculatePercent(asNumber(subtotalRecord.value), portfolioValue),
+        performanceContributionPercent: calculatePercent(
+          asNumber(subtotalRecord.total_gain),
+          groupContributionDenominator,
+        ),
+        ...groupTotals,
         holdings: holdingsByGroup.get(key) ?? [],
       };
     })
@@ -111,12 +125,13 @@ function resolveReportPayload(input: unknown): Record<string, unknown> | undefin
   return deeplyNestedReport ?? nestedReport ?? root;
 }
 
-function formatHoldingRow(holding: Record<string, unknown>): unknown {
+function formatHoldingRow(
+  holding: Record<string, unknown>,
+  params: { portfolioValue: number; contributionDenominator: number },
+): unknown {
   const instrument = asRecord(holding.instrument);
   return {
     id: asNumber(holding.id),
-    groupId: asNumber(holding.group_id),
-    groupName: asString(holding.group_name),
     labels: extractLabelNames(holding.labels),
     code: asString(instrument?.code),
     marketCode: asString(instrument?.market_code),
@@ -132,6 +147,11 @@ function formatHoldingRow(holding: Record<string, unknown>): unknown {
     payoutGainPercent: asNumber(holding.payout_gain_percent),
     currencyGainPercent: asNumber(holding.currency_gain_percent),
     totalGainPercent: asNumber(holding.total_gain_percent),
+    portfolioWeightPercent: calculatePercent(asNumber(holding.value), params.portfolioValue),
+    performanceContributionPercent: calculatePercent(
+      asNumber(holding.total_gain),
+      params.contributionDenominator,
+    ),
     unconfirmedTransactions: asNumber(holding.number_of_unconfirmed_transactions),
   };
 }
@@ -199,4 +219,26 @@ function extractLabelNames(input: unknown): string[] {
       return undefined;
     })
     .filter((value): value is string => Boolean(value));
+}
+
+function sumAbsoluteTotalGains(rows: unknown[]): number {
+  return rows.reduce<number>((sum, row) => {
+    const record = asRecord(row);
+    const totalGain = asNumber(record?.total_gain);
+    if (typeof totalGain !== "number") {
+      return sum;
+    }
+    return sum + Math.abs(totalGain);
+  }, 0);
+}
+
+function calculatePercent(value: number | undefined, denominator: number): number {
+  if (typeof value !== "number" || denominator === 0) {
+    return 0;
+  }
+  return roundTo2Dp((value / denominator) * 100);
+}
+
+function roundTo2Dp(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
 }

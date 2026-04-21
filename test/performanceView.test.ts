@@ -112,9 +112,19 @@ describe("renderPerformanceView", () => {
     expect((result.meta as Record<string, unknown>).openPositionsOnly).toBe(true);
     expect(groups.length).toBe(1);
     expect(groups[0]?.groupName).toBe("ASX");
+    expect(groups[0]?.portfolioWeightPercent).toBe(50);
+    expect(groups[0]?.performanceContributionPercent).toBe(100);
+    expect(groups[0]?.value).toBe(500);
+    expect(groups[0]?.capitalGain).toBe(100);
+    expect(groups[0]?.totalGain).toBe(125);
+    expect(groups[0]?.totals).toBeUndefined();
     const holdings = groups[0]?.holdings as Array<Record<string, unknown>>;
     expect(holdings.length).toBe(1);
     expect(holdings[0]?.labels).toEqual(["Core", "ETF"]);
+    expect(holdings[0]?.groupId).toBeUndefined();
+    expect(holdings[0]?.groupName).toBeUndefined();
+    expect(holdings[0]?.portfolioWeightPercent).toBe(50);
+    expect(holdings[0]?.performanceContributionPercent).toBe(100);
   });
 
   it("renders table view when payload is only one report level", () => {
