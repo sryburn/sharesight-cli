@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { resolvePortfolioByIdOrName } from "../src/portfolioResolver.js";
 
 const portfolios = [
-  { id: 1, name: "Main Portfolio" },
-  { id: 2, name: "Retirement" },
+  { id: 1, name: "Main Portfolio", consolidated: false },
+  { id: 2, name: "Retirement", consolidated: true },
 ];
 
 describe("resolvePortfolioByIdOrName", () => {

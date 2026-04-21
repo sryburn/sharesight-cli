@@ -8,10 +8,12 @@ export interface Credentials {
 export interface Portfolio {
   id: number;
   name: string;
+  consolidated: boolean;
   [key: string]: unknown;
 }
 
 export interface CliContextState {
   defaultPortfolioId?: number;
   defaultPortfolioName?: string;
+  defaultPortfolioConsolidated?: boolean;
 }

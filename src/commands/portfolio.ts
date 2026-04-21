@@ -22,7 +22,7 @@ export function registerPortfolioCommands(
       const config = getConfig();
       const client = new SharesightClient(config);
       const credentials = await loadCredentials();
-      const portfolios = await client.listPortfolios(credentials);
+      const portfolios = await client.listAllPortfolios(credentials);
       printOutput(portfolios, normalizeFormat(options.format));
     });
 
@@ -42,11 +42,12 @@ export function registerPortfolioCommands(
       const config = getConfig();
       const client = new SharesightClient(config);
       const credentials = await loadCredentials();
-      const portfolios = await client.listPortfolios(credentials);
+      const portfolios = await client.listAllPortfolios(credentials);
       const selected = resolvePortfolioByIdOrName(portfolioInput, portfolios);
       await contextStore.write({
         defaultPortfolioId: selected.id,
         defaultPortfolioName: selected.name,
+        defaultPortfolioConsolidated: selected.consolidated,
       });
       process.stdout.write(`Default portfolio set to ${selected.name} (${selected.id}).\n`);
     });

@@ -10,8 +10,23 @@ export class SharesightClient {
     this.tokenProvider = tokenProvider ?? new TokenProvider(config.baseUrl, config.timeoutMs);
   }
 
-  async listPortfolios(credentials: Credentials): Promise<Portfolio[]> {
-    const data = await this.getJson<unknown>(`/api/v3/portfolios`, credentials);
+  async listPortfolios(credentials: Credentials, consolidated: boolean): Promise<Portfolio[]> {
+    const data = await this.getJson<unknown>(
+      `/api/v3/portfolios?consolidated=${consolidated ? "true" : "false"}`,
+      credentials,
+    );
+    return this.parsePortfolioListResponse(data);
+  }
+
+  async listAllPortfolios(credentials: Credentials): Promise<Portfolio[]> {
+    const [standardPortfolios, consolidatedPortfolios] = await Promise.all([
+      this.listPortfolios(credentials, false),
+      this.listPortfolios(credentials, true),
+    ]);
+    return [...standardPortfolios, ...consolidatedPortfolios];
+  }
+
+  private parsePortfolioListResponse(data: unknown): Portfolio[] {
     if (Array.isArray(data)) {
       return data as Portfolio[];
     }

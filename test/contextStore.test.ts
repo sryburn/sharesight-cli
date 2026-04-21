@@ -10,9 +10,14 @@ describe("ContextStore", () => {
     const file = path.join(dir, "state.json");
     const store = new ContextStore(file);
 
-    await store.write({ defaultPortfolioId: 123, defaultPortfolioName: "Main" });
+    await store.write({
+      defaultPortfolioId: 123,
+      defaultPortfolioName: "Main",
+      defaultPortfolioConsolidated: true,
+    });
     const state = await store.read();
     expect(state.defaultPortfolioId).toBe(123);
     expect(state.defaultPortfolioName).toBe("Main");
+    expect(state.defaultPortfolioConsolidated).toBe(true);
   });
 });

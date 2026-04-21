@@ -8,6 +8,7 @@ import type { CliContextState } from "../types.js";
 const stateSchema = z.object({
   defaultPortfolioId: z.number().int().positive().optional(),
   defaultPortfolioName: z.string().min(1).optional(),
+  defaultPortfolioConsolidated: z.boolean().optional(),
 });
 
 export class ContextStore {
