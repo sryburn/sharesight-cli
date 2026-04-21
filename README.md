@@ -51,7 +51,7 @@ Use `sharesight auth status` to see which credential backend is currently active
 
 ```bash
 sharesight performance --portfolio 123 --format json
-sharesight performance --portfolio "Main Portfolio" --from 2024-01-01 --to 2024-12-31
+sharesight performance --portfolio "Main Portfolio" --start-date 2024-01-01 --end-date 2024-12-31 --include-sales
 ```
 
 Global options:

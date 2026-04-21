@@ -16,8 +16,9 @@ export function registerPerformanceCommand(
     .command("performance")
     .description("Show Sharesight portfolio performance report")
     .option("--portfolio <id-or-name>", "Portfolio ID or exact name")
-    .option("--from <date>", "Start date (YYYY-MM-DD)")
-    .option("--to <date>", "End date (YYYY-MM-DD)")
+    .option("--start-date <date>", "Start date (YYYY-MM-DD)")
+    .option("--end-date <date>", "End date (YYYY-MM-DD)")
+    .option("--include-sales", "Include sold positions")
     .option("--period <period>", "Sharesight period value")
     .option("--format <format>", "json|jsonl", "json")
     .action(async (options) => {
@@ -32,8 +33,9 @@ export function registerPerformanceCommand(
       });
 
       const performance = await client.getPerformance(credentials, selected.id, {
-        from: options.from,
-        to: options.to,
+        start_date: options.startDate,
+        end_date: options.endDate,
+        include_sales: options.includeSales ? "true" : undefined,
         period: options.period,
       });
       printOutput(
