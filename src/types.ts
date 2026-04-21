@@ -1,4 +1,14 @@
 export type OutputFormat = "json" | "jsonl";
+export type PerformanceGrouping =
+  | "country"
+  | "currency"
+  | "custom_group"
+  | "industry_classification"
+  | "investment_type"
+  | "market"
+  | "portfolio"
+  | "sector_classification"
+  | "ungrouped";
 
 export interface Credentials {
   clientId: string;
@@ -16,4 +26,6 @@ export interface CliContextState {
   defaultPortfolioId?: number;
   defaultPortfolioName?: string;
   defaultPortfolioConsolidated?: boolean;
+  defaultGrouping?: PerformanceGrouping;
+  defaultCustomGroupId?: number;
 }

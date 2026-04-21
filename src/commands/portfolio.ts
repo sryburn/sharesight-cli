@@ -27,6 +27,25 @@ export function registerPortfolioCommands(
     });
 
   portfolio
+    .command("show")
+    .description("Show current default portfolio")
+    .option("--format <format>", "json|jsonl", "json")
+    .action(async (options) => {
+      const state = await contextStore.read();
+      if (!state.defaultPortfolioId) {
+        throw new Error("No default portfolio set. Run `sharesight portfolio use <id-or-name>` first.");
+      }
+      printOutput(
+        {
+          portfolioId: state.defaultPortfolioId,
+          portfolioName: state.defaultPortfolioName ?? `Portfolio ${state.defaultPortfolioId}`,
+          consolidated: state.defaultPortfolioConsolidated ?? false,
+        },
+        normalizeFormat(options.format),
+      );
+    });
+
+  portfolio
     .command("use")
     .description("Set default portfolio by id or exact name")
     .argument("[portfolio]", "Portfolio ID or exact name")
@@ -44,7 +63,9 @@ export function registerPortfolioCommands(
       const credentials = await loadCredentials();
       const portfolios = await client.listAllPortfolios(credentials);
       const selected = resolvePortfolioByIdOrName(portfolioInput, portfolios);
+      const current = await contextStore.read();
       await contextStore.write({
+        ...current,
         defaultPortfolioId: selected.id,
         defaultPortfolioName: selected.name,
         defaultPortfolioConsolidated: selected.consolidated,

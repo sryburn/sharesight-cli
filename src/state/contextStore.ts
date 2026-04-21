@@ -9,6 +9,20 @@ const stateSchema = z.object({
   defaultPortfolioId: z.number().int().positive().optional(),
   defaultPortfolioName: z.string().min(1).optional(),
   defaultPortfolioConsolidated: z.boolean().optional(),
+  defaultGrouping: z
+    .enum([
+      "country",
+      "currency",
+      "custom_group",
+      "industry_classification",
+      "investment_type",
+      "market",
+      "portfolio",
+      "sector_classification",
+      "ungrouped",
+    ])
+    .optional(),
+  defaultCustomGroupId: z.number().int().positive().optional(),
 });
 
 export class ContextStore {

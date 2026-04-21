@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { loadCredentials } from "../auth/credentialStore.js";
 import type { RuntimeConfig } from "../config.js";
 import { printOutput } from "../formatters/output.js";
+import { extractCustomGroupsFromV2GroupsResponse, resolveGroupingSelection } from "../grouping.js";
 import { SharesightClient } from "../http/sharesightClient.js";
 import { resolvePortfolioByIdOrName } from "../portfolioResolver.js";
 import { ContextStore } from "../state/contextStore.js";
@@ -19,6 +20,7 @@ export function registerPerformanceCommand(
     .option("--start-date <date>", "Start date (YYYY-MM-DD)")
     .option("--end-date <date>", "End date (YYYY-MM-DD)")
     .option("--include-sales", "Include sold positions")
+    .option("--grouping <grouping>", "Performance grouping or custom group name/id")
     .option("--period <period>", "Sharesight period value")
     .option("--format <format>", "json|jsonl", "json")
     .action(async (options) => {
@@ -31,11 +33,23 @@ export function registerPerformanceCommand(
         credentials,
         contextStore,
       });
+      const context = await contextStore.read();
+      const grouping = await resolveGroupingSelection({
+        explicitGrouping: options.grouping as string | undefined,
+        defaultGrouping: context.defaultGrouping,
+        defaultCustomGroupId: context.defaultCustomGroupId,
+        loadCustomGroups: async () => {
+          const response = await client.listGroups(credentials);
+          return extractCustomGroupsFromV2GroupsResponse(response);
+        },
+      });
 
       const performance = await client.getPerformance(credentials, selected.id, {
         start_date: options.startDate,
         end_date: options.endDate,
         include_sales: options.includeSales ? "true" : undefined,
+        grouping: grouping.grouping,
+        custom_group_id: grouping.customGroupId ? String(grouping.customGroupId) : undefined,
         consolidated: selected.consolidated ? "true" : undefined,
         period: options.period,
       });
@@ -44,6 +58,8 @@ export function registerPerformanceCommand(
           portfolioId: selected.id,
           portfolioName: selected.name,
           consolidated: selected.consolidated,
+          grouping: grouping.grouping,
+          customGroupId: grouping.customGroupId,
           report: performance,
         },
         normalizeFormat(options.format),

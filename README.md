@@ -7,7 +7,11 @@ CLI wrapper for a focused subset of the Sharesight API, designed with AI agent w
 - `sharesight auth login`
 - `sharesight auth status`
 - `sharesight auth logout`
+- `sharesight group list`
+- `sharesight group use <grouping-or-custom-name-or-id>`
+- `sharesight group show`
 - `sharesight portfolio list`
+- `sharesight portfolio show`
 - `sharesight portfolio use <id-or-name>`
 - `sharesight performance [--portfolio <id-or-name>]`
 
@@ -42,6 +46,7 @@ Use `sharesight auth status` to see which credential backend is currently active
 ## Portfolio ergonomics
 
 - Discover portfolios: `sharesight portfolio list`
+- Show current default: `sharesight portfolio show`
 - Set a default once: `sharesight portfolio use "My Portfolio"`
 - After default is set, `sharesight performance` can be called without `--portfolio`.
 - `--portfolio` accepts exact name or ID.
@@ -52,7 +57,14 @@ Use `sharesight auth status` to see which credential backend is currently active
 ```bash
 sharesight performance --portfolio 123 --format json
 sharesight performance --portfolio "Main Portfolio" --start-date 2024-01-01 --end-date 2024-12-31 --include-sales
+sharesight performance --grouping market
+sharesight performance --grouping 123
+sharesight performance --grouping "Long Term"
 ```
+
+If `--grouping` is omitted, the CLI uses the default set by `sharesight group use`.
+
+Use `sharesight group list` to view valid default groups and discover custom group names/IDs.
 
 Global options:
 

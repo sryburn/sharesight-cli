@@ -51,6 +51,10 @@ export class SharesightClient {
     return this.getJson(`/api/v3/portfolios/${portfolioId}/performance${suffix}`, credentials);
   }
 
+  async listGroups(credentials: Credentials): Promise<unknown> {
+    return this.getJson(`/api/v2/groups.json`, credentials);
+  }
+
   private async getJson<T>(path: string, credentials: Credentials): Promise<T> {
     const token = await this.tokenProvider.getAccessToken(credentials);
     let response: Response;

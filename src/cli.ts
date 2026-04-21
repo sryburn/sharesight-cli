@@ -3,6 +3,7 @@ import { setDefaultResultOrder } from "node:dns";
 import { Command } from "commander";
 import { readRuntimeConfig } from "./config.js";
 import { registerAuthCommands } from "./commands/auth.js";
+import { registerGroupCommands } from "./commands/group.js";
 import { registerPortfolioCommands } from "./commands/portfolio.js";
 import { registerPerformanceCommand } from "./commands/performance.js";
 
@@ -29,6 +30,7 @@ async function main(): Promise<void> {
     });
 
   registerAuthCommands(program, getConfig);
+  registerGroupCommands(program, getConfig);
   registerPortfolioCommands(program, getConfig);
   registerPerformanceCommand(program, getConfig);
 
