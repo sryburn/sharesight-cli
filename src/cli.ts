@@ -16,7 +16,7 @@ async function main(): Promise<void> {
 
   const program = new Command()
     .name("sharesight")
-    .description("CLI wrapper around Sharesight API")
+    .description("Unofficial CLI client for Sharesight")
     .version("0.1.0")
     .option("--base-url <url>", "Sharesight API base URL")
     .option("--timeout-ms <ms>", "Request timeout in milliseconds")

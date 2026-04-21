@@ -1,6 +1,6 @@
 # sharesight-cli
 
-CLI wrapper for a focused subset of the Sharesight API, designed with AI agent workflows in mind.
+Unofficial CLI client for [Sharesight](https://sharesight.com), designed with AI agent workflows in mind.
 
 ## Commands
 
@@ -29,6 +29,8 @@ npm run dev -- --help
 ## Authentication
 
 Each user uses their own Sharesight OAuth `client_id` and `client_secret`.
+
+Paying Sharesight subscribers may contact Sharesight support and ask them to provision an API account for personal use.
 
 You can provide credentials in two ways:
 
