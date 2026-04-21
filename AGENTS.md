@@ -24,3 +24,6 @@
 - Update tests and README.md when behavior changes.
 - Perform regular git commits but always ask the user for permission first.
 
+## Relevant Documentation
+
+- [Sharesight API V3 Reference](https://portfolio.sharesight.com/api/3/doc/index.html)
