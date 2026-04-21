@@ -7,13 +7,29 @@ Unofficial CLI client for [Sharesight](https://sharesight.com), designed with AI
 - `sharesight auth login`
 - `sharesight auth status`
 - `sharesight auth logout`
-- `sharesight defaults show`
-- `sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>] [--include-sales|--exclude-sales] [--format <json|jsonl>]`
 - `sharesight list portfolios`
 - `sharesight list groupings`
-- `sharesight get performance [--portfolio <id-or-name>]`
+- `sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>] [--include-sales|--exclude-sales] [--format <json|jsonl>]`
+- `sharesight defaults show` 
+- `sharesight get performance [--portfolio <id-or-name>] [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD] [--include-sales|--exclude-sales] [--grouping <grouping-or-custom-name-or-id>] [--format <json|jsonl>]`
 
 ## Installation
+
+Install globally (recommended for regular use):
+
+```bash
+npm install -g sharesight-cli
+```
+
+Run without installing globally:
+
+```bash
+npx sharesight-cli --help
+```
+
+## Development
+
+For local development:
 
 ```bash
 npm install
@@ -30,7 +46,7 @@ npm run dev -- --help
 
 Each user uses their own Sharesight OAuth `client_id` and `client_secret`.
 
-Paying Sharesight subscribers may contact Sharesight support and ask them to provision an API account for personal use.
+Paying Sharesight subscribers can contact Sharesight support and ask them to provision an API account for personal use.
 
 You can provide credentials in two ways:
 
@@ -78,8 +94,8 @@ sharesight get performance --grouping "Long Term"
 ```
 
 - If `--portfolio` is omitted, `get performance` uses the default portfolio from `defaults set`.
-- If `--grouping` is omitted, `get performance` uses the default grouping from `defaults set`.
-- If `--include-sales` / `--exclude-sales` is omitted, `get performance` uses the sales default from `defaults set`.
+- If `--grouping` is omitted, `get performance` uses the default grouping from `defaults set` or otherwise falls back to the Sharesight default.
+- If `--include-sales` / `--exclude-sales` is omitted, `get performance` uses the sales default from `defaults set` or otherwise falls back to the Sharesight default.
 - If `--format` is omitted, `get performance` uses the output format default from `defaults set` (or `json` if unset).
 - `--grouping` accepts:
   - standard grouping names (`market`, `currency`, etc.)
