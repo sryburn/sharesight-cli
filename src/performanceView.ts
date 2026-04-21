@@ -117,6 +117,7 @@ function formatHoldingRow(holding: Record<string, unknown>): unknown {
     id: asNumber(holding.id),
     groupId: asNumber(holding.group_id),
     groupName: asString(holding.group_name),
+    labels: extractLabelNames(holding.labels),
     code: asString(instrument?.code),
     marketCode: asString(instrument?.market_code),
     name: asString(instrument?.name),
@@ -182,4 +183,20 @@ function asNumber(input: unknown): number | undefined {
 
 function asBoolean(input: unknown): boolean | undefined {
   return typeof input === "boolean" ? input : undefined;
+}
+
+function extractLabelNames(input: unknown): string[] {
+  const labels = asArray(input);
+  return labels
+    .map((label): string | undefined => {
+      if (typeof label === "string") {
+        return label;
+      }
+      const record = asRecord(label);
+      if (record && typeof record.name === "string" && record.name.length > 0) {
+        return record.name;
+      }
+      return undefined;
+    })
+    .filter((value): value is string => Boolean(value));
 }

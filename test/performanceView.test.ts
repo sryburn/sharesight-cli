@@ -40,6 +40,16 @@ describe("renderPerformanceView", () => {
           market_code: "ASX",
           name: "Vanguard Australian Shares Index Etf",
         },
+        labels: [
+          {
+            id: 1,
+            name: "Core",
+          },
+          {
+            id: 2,
+            name: "ETF",
+          },
+        ],
         quantity: 100,
         value: 500,
         instrument_price: 5,
@@ -102,7 +112,9 @@ describe("renderPerformanceView", () => {
     expect((result.meta as Record<string, unknown>).openPositionsOnly).toBe(true);
     expect(groups.length).toBe(1);
     expect(groups[0]?.groupName).toBe("ASX");
-    expect((groups[0]?.holdings as unknown[]).length).toBe(1);
+    const holdings = groups[0]?.holdings as Array<Record<string, unknown>>;
+    expect(holdings.length).toBe(1);
+    expect(holdings[0]?.labels).toEqual(["Core", "ETF"]);
   });
 
   it("renders table view when payload is only one report level", () => {
