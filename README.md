@@ -8,7 +8,7 @@ CLI wrapper for a focused subset of the Sharesight API, designed with AI agent w
 - `sharesight auth status`
 - `sharesight auth logout`
 - `sharesight defaults show`
-- `sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>]`
+- `sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>] [--include-sales|--exclude-sales] [--format <json|jsonl>]`
 - `sharesight list portfolios`
 - `sharesight list groupings`
 - `sharesight get performance [--portfolio <id-or-name>]`
@@ -52,6 +52,9 @@ Set defaults once, then run report commands without repeating flags.
 - Set only one default:
   - `sharesight defaults set --portfolio 123`
   - `sharesight defaults set --grouping "Long Term"`
+  - `sharesight defaults set --include-sales`
+  - `sharesight defaults set --exclude-sales`
+  - `sharesight defaults set --format jsonl`
 
 ## Lists
 
@@ -66,6 +69,7 @@ Set defaults once, then run report commands without repeating flags.
 sharesight get performance --format json
 sharesight get performance --portfolio 123 --format json
 sharesight get performance --start-date 2024-01-01 --end-date 2024-12-31 --include-sales
+sharesight get performance --exclude-sales
 sharesight get performance --grouping market
 sharesight get performance --grouping 123
 sharesight get performance --grouping "Long Term"
@@ -73,6 +77,8 @@ sharesight get performance --grouping "Long Term"
 
 - If `--portfolio` is omitted, `get performance` uses the default portfolio from `defaults set`.
 - If `--grouping` is omitted, `get performance` uses the default grouping from `defaults set`.
+- If `--include-sales` / `--exclude-sales` is omitted, `get performance` uses the sales default from `defaults set`.
+- If `--format` is omitted, `get performance` uses the output format default from `defaults set` (or `json` if unset).
 - `--grouping` accepts:
   - standard grouping names (`market`, `currency`, etc.)
   - custom grouping ID (e.g. `123`)

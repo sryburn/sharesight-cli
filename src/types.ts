@@ -29,4 +29,6 @@ export interface CliContextState {
   defaultPortfolioAccessLevel?: string;
   defaultGrouping?: PerformanceGrouping;
   defaultCustomGroupId?: number;
+  defaultIncludeSales?: boolean;
+  defaultFormat?: OutputFormat;
 }

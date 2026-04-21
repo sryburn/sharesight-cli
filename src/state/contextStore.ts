@@ -24,6 +24,8 @@ const stateSchema = z.object({
     ])
     .optional(),
   defaultCustomGroupId: z.number().int().positive().optional(),
+  defaultIncludeSales: z.boolean().optional(),
+  defaultFormat: z.enum(["json", "jsonl"]).optional(),
 });
 
 export class ContextStore {

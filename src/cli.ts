@@ -32,6 +32,7 @@ Command reference:
   defaults
     sharesight defaults show [--format json|jsonl]
     sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>]
+      [--include-sales|--exclude-sales] [--format json|jsonl]
 
   list
     sharesight list portfolios [--format json|jsonl]
@@ -39,7 +40,7 @@ Command reference:
 
   get
     sharesight get performance [--portfolio <id-or-name>] [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD]
-      [--include-sales] [--grouping <grouping-or-custom-name-or-id>]
+      [--include-sales|--exclude-sales] [--grouping <grouping-or-custom-name-or-id>]
       [--format json|jsonl]
 
 Details:

@@ -20,8 +20,9 @@ export function registerGetCommands(program: Command, getConfig: () => RuntimeCo
     .option("--start-date <date>", "Start date (YYYY-MM-DD)")
     .option("--end-date <date>", "End date (YYYY-MM-DD)")
     .option("--include-sales", "Include sold positions")
+    .option("--exclude-sales", "Exclude sold positions")
     .option("--grouping <grouping>", "Performance grouping or custom group name/id")
-    .option("--format <format>", "json|jsonl", "json")
+    .option("--format <format>", "json|jsonl")
     .action(async (options) => {
       const config = getConfig();
       const client = new SharesightClient(config);
@@ -33,6 +34,9 @@ export function registerGetCommands(program: Command, getConfig: () => RuntimeCo
         contextStore,
       });
       const context = await contextStore.read();
+      if ((options.includeSales as boolean | undefined) && (options.excludeSales as boolean | undefined)) {
+        throw new Error("Conflicting options: use only one of --include-sales or --exclude-sales.");
+      }
       const grouping = await resolveGroupingSelection({
         explicitGrouping: options.grouping as string | undefined,
         defaultGrouping: context.defaultGrouping,
@@ -52,7 +56,11 @@ export function registerGetCommands(program: Command, getConfig: () => RuntimeCo
       const performance = await client.getPerformance(credentials, selected.id, {
         start_date: options.startDate,
         end_date: options.endDate,
-        include_sales: options.includeSales ? "true" : undefined,
+        include_sales: resolveIncludeSalesOption({
+          includeSales: options.includeSales as boolean | undefined,
+          excludeSales: options.excludeSales as boolean | undefined,
+          defaultIncludeSales: context.defaultIncludeSales,
+        }),
         grouping: grouping.grouping,
         custom_group_id: grouping.customGroupId ? String(grouping.customGroupId) : undefined,
         consolidated: selected.consolidated ? "true" : undefined,
@@ -63,7 +71,7 @@ export function registerGetCommands(program: Command, getConfig: () => RuntimeCo
         consolidated: selected.consolidated,
         report: performance,
       });
-      printOutput(output, normalizeFormat(options.format));
+      printOutput(output, resolveOutputFormat(options.format as string | undefined, context.defaultFormat));
     });
 }
 
@@ -72,6 +80,30 @@ function normalizeFormat(input: string): OutputFormat {
     return input;
   }
   throw new Error(`Unsupported format '${input}'. Use json or jsonl.`);
+}
+
+function resolveOutputFormat(explicit: string | undefined, fallback: OutputFormat | undefined): OutputFormat {
+  if (explicit) {
+    return normalizeFormat(explicit);
+  }
+  return fallback ?? "json";
+}
+
+function resolveIncludeSalesOption(params: {
+  includeSales?: boolean;
+  excludeSales?: boolean;
+  defaultIncludeSales?: boolean;
+}): string | undefined {
+  if (params.includeSales) {
+    return "true";
+  }
+  if (params.excludeSales) {
+    return "false";
+  }
+  if (typeof params.defaultIncludeSales === "boolean") {
+    return params.defaultIncludeSales ? "true" : "false";
+  }
+  return undefined;
 }
 
 async function resolveSelectedPortfolio(params: {

@@ -17,6 +17,8 @@ describe("ContextStore", () => {
       defaultPortfolioAccessLevel: "OWNER",
       defaultGrouping: "custom_group",
       defaultCustomGroupId: 456,
+      defaultIncludeSales: true,
+      defaultFormat: "jsonl",
     });
     const state = await store.read();
     expect(state.defaultPortfolioId).toBe(123);
@@ -25,5 +27,7 @@ describe("ContextStore", () => {
     expect(state.defaultPortfolioAccessLevel).toBe("OWNER");
     expect(state.defaultGrouping).toBe("custom_group");
     expect(state.defaultCustomGroupId).toBe(456);
+    expect(state.defaultIncludeSales).toBe(true);
+    expect(state.defaultFormat).toBe("jsonl");
   });
 });

@@ -37,6 +37,8 @@ export function registerDefaultsCommands(
                 customGroupId: state.defaultCustomGroupId,
               }
             : undefined,
+          includeSales: state.defaultIncludeSales,
+          format: state.defaultFormat,
         },
         normalizeFormat(options.format),
       );
@@ -47,11 +49,22 @@ export function registerDefaultsCommands(
     .description("Set default portfolio and/or grouping")
     .option("--portfolio <id-or-name>", "Default portfolio ID or exact name")
     .option("--grouping <grouping>", "Default grouping or custom group name/id")
+    .option("--include-sales", "Default to including sold positions")
+    .option("--exclude-sales", "Default to excluding sold positions")
+    .option("--format <format>", "Default output format: json|jsonl")
     .action(async (options) => {
       const portfolioInput = options.portfolio as string | undefined;
       const groupingInput = options.grouping as string | undefined;
-      if (!portfolioInput && !groupingInput) {
-        throw new Error("No defaults specified. Provide --portfolio and/or --grouping.");
+      const includeSales = options.includeSales as boolean | undefined;
+      const excludeSales = options.excludeSales as boolean | undefined;
+      const formatInput = options.format as string | undefined;
+      if (includeSales && excludeSales) {
+        throw new Error("Conflicting options: use only one of --include-sales or --exclude-sales.");
+      }
+      if (!portfolioInput && !groupingInput && !includeSales && !excludeSales && !formatInput) {
+        throw new Error(
+          "No defaults specified. Provide one or more of --portfolio, --grouping, --include-sales/--exclude-sales, or --format.",
+        );
       }
 
       const config = getConfig();
@@ -94,10 +107,16 @@ export function registerDefaultsCommands(
         };
       }
 
+      const includeSalesDefault =
+        includeSales ? true : excludeSales ? false : current.defaultIncludeSales;
+      const defaultFormat = formatInput ? normalizeFormat(formatInput) : current.defaultFormat;
+
       await contextStore.write({
         ...current,
         ...portfolioDefaults,
         ...groupingDefaults,
+        defaultIncludeSales: includeSalesDefault,
+        defaultFormat,
       });
 
       process.stdout.write("Defaults updated.\n");
