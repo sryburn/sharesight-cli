@@ -4,3 +4,4 @@ dist
 coverage
 mise.toml
 .cursor/
+sharesight-cli-*.tgz
