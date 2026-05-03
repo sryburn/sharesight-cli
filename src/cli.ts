@@ -47,6 +47,12 @@ Command reference:
     sharesight get performance [--portfolio <id-or-name>] [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD]
       [--include-sales|--exclude-sales] [--grouping <grouping-or-custom-name-or-id>]
       [--format json|jsonl]
+    sharesight get trades [--portfolio <id-or-name>] [--holding <symbol[.market]>]
+      [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD] [--unique-identifier <id>]
+      [--format json|jsonl]
+    sharesight get payouts [--portfolio <id-or-name>] [--holding <symbol[.market]>]
+      [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD] [--use-date paid_on|ex_date]
+      [--format json|jsonl]
 
 Details:
   sharesight <command> --help

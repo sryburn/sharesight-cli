@@ -41,18 +41,65 @@ export class SharesightClient {
     portfolioId: number,
     query: Record<string, string | undefined>,
   ): Promise<unknown> {
-    const params = new URLSearchParams();
-    for (const [key, value] of Object.entries(query)) {
-      if (value) {
-        params.set(key, value);
-      }
-    }
-    const suffix = params.toString() ? `?${params.toString()}` : "";
+    const suffix = buildQuerySuffix(query);
     return this.getJson(`/api/v3/portfolios/${portfolioId}/performance${suffix}`, credentials);
   }
 
   async listGroups(credentials: Credentials): Promise<unknown> {
     return this.getJson(`/api/v2/groups.json`, credentials);
+  }
+
+  async listPortfolioHoldings(
+    credentials: Credentials,
+    portfolioId: number,
+    consolidated: boolean,
+  ): Promise<unknown> {
+    const suffix = consolidated ? "?consolidated=true" : "";
+    return this.getJson(`/api/v3/portfolios/${portfolioId}/holdings${suffix}`, credentials);
+  }
+
+  async getPortfolioTrades(
+    credentials: Credentials,
+    portfolioId: number,
+    query: Record<string, string | undefined>,
+  ): Promise<unknown> {
+    return this.getJson(
+      `/api/v2/portfolios/${portfolioId}/trades.json${buildQuerySuffix(query)}`,
+      credentials,
+    );
+  }
+
+  async getHoldingTrades(
+    credentials: Credentials,
+    holdingId: number,
+    query: Record<string, string | undefined>,
+  ): Promise<unknown> {
+    return this.getJson(
+      `/api/v2/holdings/${holdingId}/trades.json${buildQuerySuffix(query)}`,
+      credentials,
+    );
+  }
+
+  async getPortfolioPayouts(
+    credentials: Credentials,
+    portfolioId: number,
+    query: Record<string, string | undefined>,
+  ): Promise<unknown> {
+    return this.getJson(
+      `/api/v2/portfolios/${portfolioId}/payouts.json${buildQuerySuffix(query)}`,
+      credentials,
+    );
+  }
+
+  async getHoldingPayouts(
+    credentials: Credentials,
+    holdingId: number,
+    query: Record<string, string | undefined>,
+  ): Promise<unknown> {
+    return this.getJson(
+      `/api/v2/holdings/${holdingId}/payouts.json${buildQuerySuffix(query)}`,
+      credentials,
+    );
   }
 
   private async getJson<T>(path: string, credentials: Credentials): Promise<T> {
@@ -86,4 +133,14 @@ export class SharesightClient {
 
     return (await response.json()) as T;
   }
+}
+
+function buildQuerySuffix(query: Record<string, string | undefined>): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value) {
+      params.set(key, value);
+    }
+  }
+  return params.toString() ? `?${params.toString()}` : "";
 }

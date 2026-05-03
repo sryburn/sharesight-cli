@@ -12,6 +12,8 @@ Unofficial CLI client for [Sharesight](https://sharesight.com), designed with AI
 - `sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>] [--include-sales|--exclude-sales] [--format <json|jsonl>]`
 - `sharesight defaults show` 
 - `sharesight get performance [--portfolio <id-or-name>] [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD] [--include-sales|--exclude-sales] [--grouping <grouping-or-custom-name-or-id>] [--format <json|jsonl>]`
+- `sharesight get trades [--portfolio <id-or-name>] [--holding <symbol[.market]>] [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD] [--unique-identifier <id>] [--format <json|jsonl>]`
+- `sharesight get payouts [--portfolio <id-or-name>] [--holding <symbol[.market]>] [--start-date YYYY-MM-DD] [--end-date YYYY-MM-DD] [--use-date <paid_on|ex_date>] [--format <json|jsonl>]`
 
 ## Installation
 
@@ -102,6 +104,40 @@ sharesight get performance --grouping "Long Term"
   - custom grouping ID (e.g. `123`)
   - custom grouping exact name (e.g. `"Long Term"`)
 
+## Get trades
+
+```bash
+sharesight get trades --format json
+sharesight get trades --portfolio 123 --start-date 2024-01-01 --end-date 2024-12-31
+sharesight get trades --holding AAPL
+sharesight get trades --holding AAPL.NASDAQ
+sharesight get trades --unique-identifier broker-confirmation-123
+```
+
+- If `--portfolio` is omitted, `get trades` uses the default portfolio from `defaults set`.
+- If `--holding` is omitted, trades are returned for the selected portfolio.
+- If `--holding` is provided, the CLI resolves it against the selected portfolio's holdings and retrieves holding-level trades.
+- `--holding` accepts an unqualified symbol (e.g. `AAPL`) only when it uniquely identifies a holding in the selected portfolio.
+- Use `symbol.market` (e.g. `AAPL.NASDAQ`) when a symbol is listed in more than one market.
+- If `--format` is omitted, `get trades` uses the output format default from `defaults set` (or `json` if unset).
+
+## Get payouts
+
+```bash
+sharesight get payouts --format json
+sharesight get payouts --portfolio 123 --start-date 2024-01-01 --end-date 2024-12-31
+sharesight get payouts --holding VAS.ASX
+sharesight get payouts --use-date ex_date
+```
+
+- If `--portfolio` is omitted, `get payouts` uses the default portfolio from `defaults set`.
+- If `--holding` is omitted, payouts are returned for the selected portfolio.
+- If `--holding` is provided, the CLI resolves it against the selected portfolio's holdings and retrieves holding-level payouts.
+- `--holding` accepts an unqualified symbol (e.g. `VAS`) only when it uniquely identifies a holding in the selected portfolio.
+- Use `symbol.market` (e.g. `VAS.ASX`) when a symbol is listed in more than one market.
+- `--use-date` accepts `paid_on` or `ex_date`.
+- If `--format` is omitted, `get payouts` uses the output format default from `defaults set` (or `json` if unset).
+
 Global options:
 
 - `--base-url` (default `https://api.sharesight.com`)
@@ -119,4 +155,3 @@ npm run lint
 npm run test
 npm run build
 ```
-

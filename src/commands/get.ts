@@ -4,10 +4,13 @@ import type { RuntimeConfig } from "../config.js";
 import { parseOutputFormat } from "../formatters/formatOption.js";
 import { printOutput } from "../formatters/output.js";
 import { extractCustomGroupsFromV2GroupsResponse, resolveGroupingSelection } from "../grouping.js";
+import type { HoldingSummary } from "../holdingResolver.js";
+import { extractHoldingsFromResponse, resolveHoldingBySymbol } from "../holdingResolver.js";
 import { SharesightClient } from "../http/sharesightClient.js";
 import { renderPerformanceTableView } from "../performanceView.js";
 import { resolvePortfolioByIdOrName } from "../portfolioResolver.js";
 import { ContextStore } from "../state/contextStore.js";
+import { renderTransactionListView } from "../transactionView.js";
 import type { Portfolio } from "../types.js";
 
 export function registerGetCommands(program: Command, getConfig: () => RuntimeConfig): void {
@@ -73,6 +76,99 @@ export function registerGetCommands(program: Command, getConfig: () => RuntimeCo
         report: performance,
       });
       printOutput(output, parseOutputFormat(options.format as string | undefined, context.defaultFormat));
+    });
+
+  get
+    .command("trades")
+    .description("Get Sharesight trades")
+    .option("--portfolio <id-or-name>", "Portfolio ID or exact name")
+    .option("--holding <symbol[.market]>", "Holding symbol, optionally qualified with market")
+    .option("--start-date <date>", "Start date (YYYY-MM-DD)")
+    .option("--end-date <date>", "End date (YYYY-MM-DD)")
+    .option("--unique-identifier <id>", "Search for trade with unique identifier")
+    .option("--format <format>", "json|jsonl")
+    .action(async (options) => {
+      const config = getConfig();
+      const client = new SharesightClient(config);
+      const credentials = await loadCredentials();
+      const selected = await resolveSelectedPortfolio({
+        explicitValue: options.portfolio as string | undefined,
+        client,
+        credentials,
+        contextStore,
+      });
+      const context = await contextStore.read();
+      const holding = await resolveOptionalHolding({
+        holdingInput: options.holding as string | undefined,
+        selectedPortfolio: selected,
+        client,
+        credentials,
+      });
+      const query = {
+        start_date: options.startDate as string | undefined,
+        end_date: options.endDate as string | undefined,
+        unique_identifier: options.uniqueIdentifier as string | undefined,
+      };
+      const response = holding
+        ? await client.getHoldingTrades(credentials, holding.id, query)
+        : await client.getPortfolioTrades(credentials, selected.id, query);
+      printOutput(
+        renderTransactionListView({
+          portfolio: selected,
+          holding,
+          kind: "trades",
+          response,
+          query,
+        }),
+        parseOutputFormat(options.format as string | undefined, context.defaultFormat),
+      );
+    });
+
+  get
+    .command("payouts")
+    .description("Get Sharesight payouts")
+    .option("--portfolio <id-or-name>", "Portfolio ID or exact name")
+    .option("--holding <symbol[.market]>", "Holding symbol, optionally qualified with market")
+    .option("--start-date <date>", "Start date (YYYY-MM-DD)")
+    .option("--end-date <date>", "End date (YYYY-MM-DD)")
+    .option("--use-date <paid_on|ex_date>", "Date field to use when filtering payouts")
+    .option("--format <format>", "json|jsonl")
+    .action(async (options) => {
+      const useDate = parsePayoutUseDate(options.useDate as string | undefined);
+      const config = getConfig();
+      const client = new SharesightClient(config);
+      const credentials = await loadCredentials();
+      const selected = await resolveSelectedPortfolio({
+        explicitValue: options.portfolio as string | undefined,
+        client,
+        credentials,
+        contextStore,
+      });
+      const context = await contextStore.read();
+      const holding = await resolveOptionalHolding({
+        holdingInput: options.holding as string | undefined,
+        selectedPortfolio: selected,
+        client,
+        credentials,
+      });
+      const query = {
+        start_date: options.startDate as string | undefined,
+        end_date: options.endDate as string | undefined,
+        use_date: useDate,
+      };
+      const response = holding
+        ? await client.getHoldingPayouts(credentials, holding.id, query)
+        : await client.getPortfolioPayouts(credentials, selected.id, query);
+      printOutput(
+        renderTransactionListView({
+          portfolio: selected,
+          holding,
+          kind: "payouts",
+          response,
+          query,
+        }),
+        parseOutputFormat(options.format as string | undefined, context.defaultFormat),
+      );
     });
 }
 
@@ -161,4 +257,32 @@ async function resolveAccessLevel(params: {
 function readAccessLevel(portfolio: Portfolio): string | undefined {
   const value = portfolio.access_level;
   return typeof value === "string" ? value : undefined;
+}
+
+async function resolveOptionalHolding(params: {
+  holdingInput?: string;
+  selectedPortfolio: Portfolio;
+  client: SharesightClient;
+  credentials: Awaited<ReturnType<typeof loadCredentials>>;
+}): Promise<HoldingSummary | undefined> {
+  if (!params.holdingInput) {
+    return undefined;
+  }
+
+  const response = await params.client.listPortfolioHoldings(
+    params.credentials,
+    params.selectedPortfolio.id,
+    params.selectedPortfolio.consolidated,
+  );
+  return resolveHoldingBySymbol(params.holdingInput, extractHoldingsFromResponse(response));
+}
+
+function parsePayoutUseDate(value?: string): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  if (value === "paid_on" || value === "ex_date") {
+    return value;
+  }
+  throw new Error("Invalid --use-date value. Use paid_on or ex_date.");
 }
