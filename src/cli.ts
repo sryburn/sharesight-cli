@@ -41,6 +41,7 @@ Command reference:
 
   list
     sharesight list portfolios [--format json|jsonl]
+    sharesight list holdings [--portfolio <id-or-name>] [--format json|jsonl]
     sharesight list groupings [--format json|jsonl]
 
   get

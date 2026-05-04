@@ -8,7 +8,7 @@ import type { HoldingSummary } from "../holdingResolver.js";
 import { extractHoldingsFromResponse, resolveHoldingBySymbol } from "../holdingResolver.js";
 import { SharesightClient } from "../http/sharesightClient.js";
 import { renderPerformanceTableView } from "../performanceView.js";
-import { resolvePortfolioByIdOrName } from "../portfolioResolver.js";
+import { resolveSelectedPortfolio } from "../portfolioSelection.js";
 import { ContextStore } from "../state/contextStore.js";
 import { renderTransactionListView } from "../transactionView.js";
 import type { Portfolio } from "../types.js";
@@ -187,32 +187,6 @@ function resolveIncludeSalesOption(params: {
     return params.defaultIncludeSales ? "true" : "false";
   }
   return undefined;
-}
-
-async function resolveSelectedPortfolio(params: {
-  explicitValue?: string;
-  client: SharesightClient;
-  credentials: Awaited<ReturnType<typeof loadCredentials>>;
-  contextStore: ContextStore;
-}): Promise<Portfolio> {
-  if (params.explicitValue) {
-    const portfolios = await params.client.listAllPortfolios(params.credentials);
-    return resolvePortfolioByIdOrName(params.explicitValue, portfolios);
-  }
-
-  const state = await params.contextStore.read();
-  if (state.defaultPortfolioId && typeof state.defaultPortfolioConsolidated === "boolean") {
-    return {
-      id: state.defaultPortfolioId,
-      name: state.defaultPortfolioName ?? `Portfolio ${state.defaultPortfolioId}`,
-      consolidated: state.defaultPortfolioConsolidated,
-      access_level: state.defaultPortfolioAccessLevel,
-    };
-  }
-
-  throw new Error(
-    "No default portfolio set. Run `sharesight defaults set --portfolio <id-or-name>` or pass --portfolio.",
-  );
 }
 
 async function assertCustomGroupingAccess(params: {

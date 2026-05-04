@@ -8,6 +8,7 @@ Unofficial CLI client for [Sharesight](https://sharesight.com), designed with AI
 - `sharesight auth status`
 - `sharesight auth logout`
 - `sharesight list portfolios`
+- `sharesight list holdings [--portfolio <id-or-name>] [--format <json|jsonl>]`
 - `sharesight list groupings`
 - `sharesight defaults set [--portfolio <id-or-name>] [--grouping <grouping-or-custom-name-or-id>] [--include-sales|--exclude-sales] [--format <json|jsonl>]`
 - `sharesight defaults show` 
@@ -80,8 +81,24 @@ Set defaults once, then run report commands without repeating flags.
 
 - Portfolios:
   - `sharesight list portfolios`
+- Holdings:
+  - `sharesight list holdings`
+  - `sharesight list holdings --portfolio 123`
 - Groupings (built-in + custom):
   - `sharesight list groupings`
+
+## List holdings
+
+```bash
+sharesight list holdings --format json
+sharesight list holdings --portfolio 123 --format jsonl
+sharesight list holdings --portfolio "Main Portfolio"
+```
+
+- If `--portfolio` is omitted, holdings use the default portfolio from `defaults set`.
+- Consolidated portfolios automatically request consolidated holdings.
+- Holdings output includes top-level portfolio context, metadata, and flattened holding rows.
+- If `--format` is omitted, `list holdings` defaults to `json`.
 
 ## Get performance
 
@@ -151,7 +168,5 @@ Global options:
 ## Development checks
 
 ```bash
-npm run lint
-npm run test
-npm run build
+npm run check
 ```

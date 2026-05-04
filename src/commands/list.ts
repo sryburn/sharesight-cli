@@ -4,10 +4,14 @@ import type { RuntimeConfig } from "../config.js";
 import { parseOutputFormat } from "../formatters/formatOption.js";
 import { printOutput } from "../formatters/output.js";
 import { extractCustomGroupsFromV2GroupsResponse, VALID_PERFORMANCE_GROUPINGS } from "../grouping.js";
+import { renderHoldingListView } from "../holdingView.js";
 import { SharesightClient } from "../http/sharesightClient.js";
+import { resolveSelectedPortfolio } from "../portfolioSelection.js";
+import { ContextStore } from "../state/contextStore.js";
 
 export function registerListCommands(program: Command, getConfig: () => RuntimeConfig): void {
-  const list = program.command("list").description("List portfolios and groupings");
+  const list = program.command("list").description("List portfolios, holdings, and groupings");
+  const contextStore = new ContextStore();
 
   list
     .command("portfolios")
@@ -19,6 +23,29 @@ export function registerListCommands(program: Command, getConfig: () => RuntimeC
       const credentials = await loadCredentials();
       const portfolios = await client.listAllPortfolios(credentials);
       printOutput(portfolios, parseOutputFormat(options.format));
+    });
+
+  list
+    .command("holdings")
+    .description("List holdings for a portfolio")
+    .option("--portfolio <id-or-name>", "Portfolio ID or exact name")
+    .option("--format <format>", "json|jsonl", "json")
+    .action(async (options) => {
+      const config = getConfig();
+      const client = new SharesightClient(config);
+      const credentials = await loadCredentials();
+      const selected = await resolveSelectedPortfolio({
+        explicitValue: options.portfolio as string | undefined,
+        client,
+        credentials,
+        contextStore,
+      });
+      const response = await client.listPortfolioHoldings(
+        credentials,
+        selected.id,
+        selected.consolidated,
+      );
+      printOutput(renderHoldingListView({ portfolio: selected, response }), parseOutputFormat(options.format));
     });
 
   list

@@ -57,9 +57,7 @@ export function resolveHoldingBySymbol(input: string, holdings: HoldingSummary[]
 }
 
 export function extractHoldingsFromResponse(response: unknown): HoldingSummary[] {
-  const root = asRecord(response);
-  const holdings = asArray(root?.holdings);
-  return holdings
+  return extractHoldingRecordsFromResponse(response)
     .map((holding): HoldingSummary | undefined => {
       const record = asRecord(holding);
       const instrument = asRecord(record?.instrument);
@@ -77,6 +75,11 @@ export function extractHoldingsFromResponse(response: unknown): HoldingSummary[]
       };
     })
     .filter((holding): holding is HoldingSummary => Boolean(holding));
+}
+
+export function extractHoldingRecordsFromResponse(response: unknown): unknown[] {
+  const root = asRecord(response);
+  return asArray(root?.holdings);
 }
 
 function formatHoldings(holdings: HoldingSummary[]): string {
